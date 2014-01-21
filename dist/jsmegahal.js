@@ -1,0 +1,208 @@
+(function() {
+  var Quad, exports;
+
+  Quad = (function() {
+    function Quad(tokens) {
+      this.tokens = tokens;
+      this.canStart = false;
+      this.canEnd = false;
+    }
+
+    Quad.prototype.hash = function() {
+      return this.tokens.join(',');
+    };
+
+    return Quad;
+
+  })();
+
+  module.exports = exports = Quad;
+
+}).call(this);
+
+(function() {
+  var Quad, exports, jsMegaHal,
+    __slice = [].slice;
+
+  Quad = require('./Quad');
+
+  /*
+  TODO load from a big string
+  TODO load from a remote URL
+  */
+
+
+  jsMegaHal = (function() {
+    jsMegaHal.prototype.wordRegex = /[a-zA-Z0-9]/;
+
+    jsMegaHal.prototype.words = {};
+
+    jsMegaHal.prototype.quads = {};
+
+    jsMegaHal.prototype.next = {};
+
+    jsMegaHal.prototype.prev = {};
+
+    /*
+    	@markov - the markov order to use for this jsMegaHal instance, defaults to 4
+    */
+
+
+    function jsMegaHal(markov) {
+      this.markov = markov != null ? markov : 4;
+    }
+
+    /*
+    	generate a number between min and max, inclusive
+    
+    	@min the lower bound
+    	@max the upper bound
+    */
+
+
+    jsMegaHal.prototype.randomInt = function(min, max) {
+      return Math.floor(Math.random() * (max - min + 1) + min);
+    };
+
+    /*
+    		a convenience method to add a quad to the quads list
+    
+    		@quad the quad to add to the list
+    */
+
+
+    jsMegaHal.prototype.addQuad = function(quad) {
+      return this.quads[quad.hash()] = quad;
+    };
+
+    /*
+    	add a sentence to jsMegaHal
+    
+    	@sentence the sentence to add to jsMegaHal. ignored if there are fewer than @markov words in it
+    */
+
+
+    jsMegaHal.prototype.add = function(sentence) {
+      var buffer, ch, chars, i, nextToken, parts, partsLength, prevToken, q, quad, token, _i, _j, _k, _ref, _ref1, _ref2, _results;
+      sentence = sentence.trim();
+      if (sentence.split(' ').length < this.markov) {
+        return;
+      }
+      parts = [];
+      chars = sentence.split('');
+      buffer = '';
+      for (i = _i = 0, _ref = chars.length; _i < _ref; i = _i += 1) {
+        ch = chars[i];
+        if (!(this.wordRegex.test(ch))) {
+          if (buffer.length !== 0) {
+            parts.push(buffer);
+          }
+          buffer = '';
+          continue;
+        }
+        buffer += ch;
+      }
+      if (buffer.length !== 0) {
+        parts.push(buffer);
+      }
+      partsLength = parts.length;
+      _results = [];
+      for (i = _j = 0, _ref1 = partsLength - this.markov - 1; _j <= _ref1; i = _j += 1) {
+        quad = new Quad(__slice.call(parts.slice(i, +(i + 3) + 1 || 9e9)));
+        this.addQuad(quad);
+        quad.canStart = i === 0;
+        quad.canEnd = i === partsLength - this.markov;
+        for (q = _k = 0, _ref2 = this.markov; _k <= _ref2; q = _k += 1) {
+          token = quad.tokens[q];
+          if (!(token in this.words)) {
+            this.words[token] = [];
+          }
+          this.words[token].push(quad);
+        }
+        if (i !== 0) {
+          prevToken = parts[i - 1];
+          if (!(quad.hash() in this.prev)) {
+            this.prev[quad.hash()] = [];
+          }
+          this.prev[quad.hash()].push(prevToken);
+        }
+        if (i < partsLength - this.markov) {
+          nextToken = parts[i + 1];
+          if (!(quad.hash() in this.next)) {
+            this.next[quad.hash()] = [];
+          }
+          _results.push(this.next[quad.hash()].push(nextToken));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    /*
+    	generate a reply from a sentence instead of just a word
+    
+    	@sentence the sentence to pick a token from
+    */
+
+
+    jsMegaHal.prototype.getReplyFromSentence = function(sentence) {
+      var tokens;
+      tokens = sentence.trim().split(' ');
+      return this.getReply(tokens[this.randomInt(0, tokens.length - 1)]);
+    };
+
+    /*
+    	generate a reply from a single word
+    
+    	@word the seed word, can be null/undefined
+    */
+
+
+    jsMegaHal.prototype.getReply = function(word) {
+      var middleQuad, newQuad, nextToken, nextTokens, parts, prevToken, prevTokens, quad, quads;
+      word = word.trim();
+      quads = [];
+      if (word) {
+        quads = this.words[word];
+      } else {
+        quads = Object.keys(this.quads);
+      }
+      if (quads.length === 0) {
+        return;
+      }
+      quad = middleQuad = quads[this.randomInt(0, quads.length - 1)];
+      parts = quad.tokens;
+      while (!(quad != null ? quad.canEnd : void 0)) {
+        nextTokens = this.next[quad.hash()];
+        if (!nextTokens) {
+          break;
+        }
+        nextToken = nextTokens[this.randomInt(0, nextTokens.length - 1)];
+        newQuad = new Quad(__slice.call(quad.tokens.slice(0, +(this.markov - 1) + 1 || 9e9)).concat([nextToken]));
+        this.addQuad(newQuad);
+        quad = this.quads[newQuad.hash()];
+        parts.push(nextToken);
+      }
+      quad = middleQuad;
+      while (!(quad != null ? quad.canStart : void 0)) {
+        prevTokens = this.prev[quad.hash()];
+        if (!prevTokens) {
+          break;
+        }
+        prevToken = prevTokens[this.randomInt(0, prevTokens.length - 1)];
+        newQuad = new Quad(__slice.call(quad.tokens.slice(0, +(this.markov - 1) + 1 || 9e9)).concat([prevToken]));
+        this.addQuad(newQuad);
+        quad = this.quads[newQuad.hash()];
+        parts.unshift(prevToken);
+      }
+      return parts.join(' ');
+    };
+
+    return jsMegaHal;
+
+  })();
+
+  module.exports = exports = Quad;
+
+}).call(this);
