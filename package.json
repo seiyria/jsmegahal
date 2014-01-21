@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/seiyria/jsmegahal/issues"
   },
-  "dependencies": {
+  "devDependencies": {
     "chai": "~1.8.1",
     "grunt-contrib-coffee": "~0.8.2",
     "mocha": "~1.17.0",
