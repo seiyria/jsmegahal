@@ -155,3 +155,5 @@ class jsMegaHal
 			parts.unshift prevToken
 
 		parts.join ' '
+
+module.exports = exports = Quad
