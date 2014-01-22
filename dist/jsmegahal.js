@@ -1,5 +1,6 @@
 (function() {
-  var Quad, exports;
+  var Quad, exports, jsMegaHal,
+    __slice = [].slice;
 
   Quad = (function() {
     function Quad(tokens) {
@@ -15,16 +16,6 @@
     return Quad;
 
   })();
-
-  module.exports = exports = Quad;
-
-}).call(this);
-
-(function() {
-  var Quad, exports, jsMegaHal,
-    __slice = [].slice;
-
-  Quad = require('./Quad');
 
   /*
   TODO load from a big string
@@ -203,6 +194,6 @@
 
   })();
 
-  module.exports = exports = Quad;
+  module.exports = exports = jsMegaHal;
 
 }).call(this);

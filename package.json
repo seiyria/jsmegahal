@@ -1,10 +1,11 @@
 {
   "name": "jsmegahal",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A port of the MegaHal AI to JS",
   "main": "index.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "prepublish": "grunt"
   },
   "repository": {
     "type": "git",
