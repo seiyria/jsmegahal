@@ -123,7 +123,7 @@ class jsMegaHal
 		quads = []
 
 		#if we don't have a specific word, everything is possible to choose from
-		if word then quads = @words[word] else quads = Object.keys @quads
+		if word and (word of @words) then quads = @words[word] else quads = Object.keys @quads
 
 		#empty brain? nothing to say
 		return if quads.length is 0
