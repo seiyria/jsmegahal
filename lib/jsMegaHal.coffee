@@ -31,7 +31,7 @@ class jsMegaHal
 	###
 	@markov - the markov order to use for this jsMegaHal instance, defaults to 4
 	###
-	constructor: (@markov = 4) ->
+	constructor: (@markov = 4, @defaultReply = '') ->
 
 	###
 	generate a number between min and max, inclusive
@@ -79,7 +79,8 @@ class jsMegaHal
 		partsLength = parts.length
 
 		#split the tokens into quads of @markov length
-		for i in [0..partsLength - @markov - 1] by 1
+		for i in [0...partsLength - (@markov - 1)] by 1
+
 			quad = new Quad [ parts[i..i+3]... ]
 			@addQuad quad
 
@@ -100,7 +101,7 @@ class jsMegaHal
 
 			#and then get the next tokens
 			if i < partsLength - @markov
-				nextToken = parts[i+1]
+				nextToken = parts[i+@markov]
 				@next[quad.hash()] = [] if not (quad.hash() of @next)
 				@next[quad.hash()].push nextToken
 
@@ -126,14 +127,18 @@ class jsMegaHal
 		if word and (word of @words) then quads = @words[word] else quads = Object.keys @quads
 
 		#empty brain? nothing to say
-		return if quads.length is 0
+		return @defaultReply if quads.length is 0
 
-		quad = middleQuad = quads[@randomInt 0, quads.length-1]
+		#quads are generated differently depending on origin
+		quadHash = quads[@randomInt 0, quads.length-1]
+		quadHash = quadHash.tokens.join(',') if typeof quadHash isnt 'string'
+		quad = middleQuad = @quads[quadHash]
 
-		parts = quad.tokens
+		#shallow copy this guy, otherwise problems happen
+		parts = quad.tokens.slice 0
 
 		#while we don't have an end, generate a next token
-		while not quad?.canEnd
+		while not quad.canEnd
 			nextTokens = @next[quad.hash()]
 
 			#no tokens, no dice -- skip
@@ -141,7 +146,7 @@ class jsMegaHal
 			nextToken = nextTokens[@randomInt 0, nextTokens.length-1]
 
 			#we have a new quad, so we should probably ensure it's in our quad list
-			newQuad = new Quad [quad.tokens[0..@markov-1]..., nextToken]
+			newQuad = new Quad [quad.tokens[1...@markov]..., nextToken]
 			@addQuad newQuad
 
 			#change to our new quad
@@ -151,12 +156,12 @@ class jsMegaHal
 		quad = middleQuad
 
 		#while we don't have a beginning, generate a previous token
-		while not quad?.canStart
+		while not quad.canStart
 			prevTokens = @prev[quad.hash()]
 			break if not prevTokens
 			prevToken = prevTokens[@randomInt 0, prevTokens.length-1]
 
-			newQuad = new Quad [quad.tokens[0..@markov-1]..., prevToken]
+			newQuad = new Quad [prevToken, quad.tokens[0...@markov-1]...]
 			@addQuad newQuad
 			quad = @quads[newQuad.hash()]
 			parts.unshift prevToken
