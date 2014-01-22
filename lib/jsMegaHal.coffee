@@ -163,4 +163,4 @@ class jsMegaHal
 
 		parts.join ' '
 
-module.exports = exports = Quad
+module.exports = exports = jsMegaHal
