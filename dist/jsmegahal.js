@@ -154,7 +154,7 @@
       var middleQuad, newQuad, nextToken, nextTokens, parts, prevToken, prevTokens, quad, quads;
       word = word.trim();
       quads = [];
-      if (word) {
+      if (word && (word in this.words)) {
         quads = this.words[word];
       } else {
         quads = Object.keys(this.quads);
