@@ -87,7 +87,7 @@ class jsMegaHal
 			quad.canEnd = (i is partsLength - @markov)
 
 			#first by word
-			for q in [0..@markov] by 1
+			for q in [0...@markov] by 1
 				token = quad.tokens[q]
 				@words[token] = [] if not (token of @words)
 				@words[token].push quad
