@@ -39,8 +39,9 @@
     */
 
 
-    function jsMegaHal(markov) {
+    function jsMegaHal(markov, defaultReply) {
       this.markov = markov != null ? markov : 4;
+      this.defaultReply = defaultReply != null ? defaultReply : '';
     }
 
     /*
@@ -98,12 +99,12 @@
       }
       partsLength = parts.length;
       _results = [];
-      for (i = _j = 0, _ref1 = partsLength - this.markov - 1; _j <= _ref1; i = _j += 1) {
+      for (i = _j = 0, _ref1 = partsLength - (this.markov - 1); _j < _ref1; i = _j += 1) {
         quad = new Quad(__slice.call(parts.slice(i, +(i + 3) + 1 || 9e9)));
         this.addQuad(quad);
         quad.canStart = i === 0;
         quad.canEnd = i === partsLength - this.markov;
-        for (q = _k = 0, _ref2 = this.markov; _k <= _ref2; q = _k += 1) {
+        for (q = _k = 0, _ref2 = this.markov; _k < _ref2; q = _k += 1) {
           token = quad.tokens[q];
           if (!(token in this.words)) {
             this.words[token] = [];
@@ -118,7 +119,7 @@
           this.prev[quad.hash()].push(prevToken);
         }
         if (i < partsLength - this.markov) {
-          nextToken = parts[i + 1];
+          nextToken = parts[i + this.markov];
           if (!(quad.hash() in this.next)) {
             this.next[quad.hash()] = [];
           }
@@ -151,7 +152,7 @@
 
 
     jsMegaHal.prototype.getReply = function(word) {
-      var middleQuad, newQuad, nextToken, nextTokens, parts, prevToken, prevTokens, quad, quads;
+      var middleQuad, newQuad, nextToken, nextTokens, parts, prevToken, prevTokens, quad, quadHash, quads;
       word = word.trim();
       quads = [];
       if (word && (word in this.words)) {
@@ -160,29 +161,33 @@
         quads = Object.keys(this.quads);
       }
       if (quads.length === 0) {
-        return;
+        return this.defaultReply;
       }
-      quad = middleQuad = quads[this.randomInt(0, quads.length - 1)];
-      parts = quad.tokens;
-      while (!(quad != null ? quad.canEnd : void 0)) {
+      quadHash = quads[this.randomInt(0, quads.length - 1)];
+      if (typeof quadHash !== 'string') {
+        quadHash = quadHash.tokens.join(',');
+      }
+      quad = middleQuad = this.quads[quadHash];
+      parts = quad.tokens.slice(0);
+      while (!quad.canEnd) {
         nextTokens = this.next[quad.hash()];
         if (!nextTokens) {
           break;
         }
         nextToken = nextTokens[this.randomInt(0, nextTokens.length - 1)];
-        newQuad = new Quad(__slice.call(quad.tokens.slice(0, +(this.markov - 1) + 1 || 9e9)).concat([nextToken]));
+        newQuad = new Quad(__slice.call(quad.tokens.slice(1, this.markov)).concat([nextToken]));
         this.addQuad(newQuad);
         quad = this.quads[newQuad.hash()];
         parts.push(nextToken);
       }
       quad = middleQuad;
-      while (!(quad != null ? quad.canStart : void 0)) {
+      while (!quad.canStart) {
         prevTokens = this.prev[quad.hash()];
         if (!prevTokens) {
           break;
         }
         prevToken = prevTokens[this.randomInt(0, prevTokens.length - 1)];
-        newQuad = new Quad(__slice.call(quad.tokens.slice(0, +(this.markov - 1) + 1 || 9e9)).concat([prevToken]));
+        newQuad = new Quad([prevToken].concat(__slice.call(quad.tokens.slice(0, this.markov - 1))));
         this.addQuad(newQuad);
         quad = this.quads[newQuad.hash()];
         parts.unshift(prevToken);
