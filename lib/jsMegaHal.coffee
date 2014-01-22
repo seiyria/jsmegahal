@@ -1,5 +1,12 @@
 
-Quad = require './Quad'
+
+class Quad
+	constructor: (@tokens) ->
+		@canStart = false
+		@canEnd = false
+
+	hash: () -> 
+		@tokens.join ','
 
 ###
 TODO load from a big string
