@@ -30,7 +30,7 @@
 
     jsMegaHal.prototype.sentenceRegex = /[!?\.]/;
 
-    jsMegaHal.prototype.words = {};
+    jsMegaHal.prototype.words = Object.create(null);
 
     jsMegaHal.prototype.quads = {};
 
@@ -164,7 +164,7 @@
 
     jsMegaHal.prototype.getReply = function(word) {
       var middleQuad, newQuad, nextToken, nextTokens, parts, prevToken, prevTokens, quad, quadHash, quads;
-      word = word.trim();
+      word = word != null ? word.trim() : void 0;
       quads = [];
       if (word && (word in this.words)) {
         quads = this.words[word];
