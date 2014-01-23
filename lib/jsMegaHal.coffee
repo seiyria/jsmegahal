@@ -21,7 +21,7 @@ class jsMegaHal
 	sentenceRegex: /[!?\.]/
 
 	#all of the current words jsMegaHal knows
-	words: {}
+	words: Object.create null
 
 	#all of the quads, mapped by quad.hash() -> quad
 	quads: {}
