@@ -118,7 +118,7 @@ class jsMegaHal
 	@word the seed word, can be null/undefined
 	###
 	getReply: (word) ->
-		word = word.trim()
+		word = word?.trim()
 		quads = []
 
 		#if we don't have a specific word, everything is possible to choose from
