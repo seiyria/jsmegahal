@@ -1,6 +1,7 @@
 (function() {
   var Quad, exports, jsMegaHal,
-    __slice = [].slice;
+    __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Quad = (function() {
     function Quad(tokens) {
@@ -20,11 +21,14 @@
   /*
   TODO load from a big string
   TODO load from a remote URL
+  TODO more punctuation
   */
 
 
   jsMegaHal = (function() {
-    jsMegaHal.prototype.wordRegex = /[a-zA-Z0-9]/;
+    jsMegaHal.prototype.wordRegex = /[^a-zA-Z0-9,']+/;
+
+    jsMegaHal.prototype.sentenceRegex = /[!?\.]/;
 
     jsMegaHal.prototype.words = {};
 
@@ -57,14 +61,30 @@
     };
 
     /*
-    		a convenience method to add a quad to the quads list
+    	a convenience method to add a quad to the quads list
     
-    		@quad the quad to add to the list
+    	@quad the quad to add to the list
     */
 
 
     jsMegaHal.prototype.addQuad = function(quad) {
-      return this.quads[quad.hash()] = quad;
+      if (!(quad.hash() in this.quads)) {
+        return this.quads[quad.hash()] = quad;
+      }
+    };
+
+    /*
+    	add a lot of text and split it by sentence
+    
+    	@longSentence a lot of text separated by characters in @sentenceRegex
+    */
+
+
+    jsMegaHal.prototype.addMass = function(longSentence) {
+      var _this = this;
+      return longSentence.split(this.sentenceRegex).forEach(function(e) {
+        return _this.add(e);
+      });
     };
 
     /*
@@ -75,37 +95,22 @@
 
 
     jsMegaHal.prototype.add = function(sentence) {
-      var buffer, ch, chars, i, nextToken, parts, partsLength, prevToken, q, quad, token, _i, _j, _k, _ref, _ref1, _ref2, _results;
+      var i, nextToken, parts, partsLength, prevToken, quad, token, _i, _j, _len, _ref, _ref1, _results;
       sentence = sentence.trim();
       if (sentence.split(' ').length < this.markov) {
         return;
       }
-      parts = [];
-      chars = sentence.split('');
-      buffer = '';
-      for (i = _i = 0, _ref = chars.length; _i < _ref; i = _i += 1) {
-        ch = chars[i];
-        if (!(this.wordRegex.test(ch))) {
-          if (buffer.length !== 0) {
-            parts.push(buffer);
-          }
-          buffer = '';
-          continue;
-        }
-        buffer += ch;
-      }
-      if (buffer.length !== 0) {
-        parts.push(buffer);
-      }
+      parts = sentence.split(this.wordRegex).filter(Boolean);
       partsLength = parts.length;
       _results = [];
-      for (i = _j = 0, _ref1 = partsLength - (this.markov - 1); _j < _ref1; i = _j += 1) {
-        quad = new Quad(__slice.call(parts.slice(i, +(i + 3) + 1 || 9e9)));
+      for (i = _i = 0, _ref = partsLength - (this.markov - 1); _i < _ref; i = _i += 1) {
+        quad = new Quad(__slice.call(parts.slice(i, i + this.markov)));
         this.addQuad(quad);
         quad.canStart = i === 0;
         quad.canEnd = i === partsLength - this.markov;
-        for (q = _k = 0, _ref2 = this.markov; _k < _ref2; q = _k += 1) {
-          token = quad.tokens[q];
+        _ref1 = quad.tokens;
+        for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+          token = _ref1[_j];
           if (!(token in this.words)) {
             this.words[token] = [];
           }
@@ -116,14 +121,20 @@
           if (!(quad.hash() in this.prev)) {
             this.prev[quad.hash()] = [];
           }
-          this.prev[quad.hash()].push(prevToken);
+          if (!(__indexOf.call(this.prev[quad.hash()], prevToken) >= 0)) {
+            this.prev[quad.hash()].push(prevToken);
+          }
         }
         if (i < partsLength - this.markov) {
           nextToken = parts[i + this.markov];
           if (!(quad.hash() in this.next)) {
             this.next[quad.hash()] = [];
           }
-          _results.push(this.next[quad.hash()].push(nextToken));
+          if (!(__indexOf.call(this.next[quad.hash()], nextToken) >= 0)) {
+            _results.push(this.next[quad.hash()].push(nextToken));
+          } else {
+            _results.push(void 0);
+          }
         } else {
           _results.push(void 0);
         }

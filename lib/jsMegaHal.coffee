@@ -11,10 +11,14 @@ class Quad
 ###
 TODO load from a big string
 TODO load from a remote URL
+TODO more punctuation
 ###
 class jsMegaHal
 	#the regex to check the validity of a character
-	wordRegex: /[a-zA-Z0-9]/
+	wordRegex: /[^a-zA-Z0-9,']+/
+
+	#the regex to split sentences by -- remove all \r\n
+	sentenceRegex: /[!?\.]/
 
 	#all of the current words jsMegaHal knows
 	words: {}
@@ -43,11 +47,20 @@ class jsMegaHal
 		return Math.floor Math.random() * (max - min + 1) + min
 	
 	###
-		a convenience method to add a quad to the quads list
+	a convenience method to add a quad to the quads list
 
-		@quad the quad to add to the list
+	@quad the quad to add to the list
 	###
-	addQuad: (quad) -> @quads[quad.hash()] = quad
+	addQuad: (quad) -> @quads[quad.hash()] = quad if not (quad.hash() of @quads)
+
+	###
+	add a lot of text and split it by sentence
+
+	@longSentence a lot of text separated by characters in @sentenceRegex
+	###
+	addMass: (longSentence) ->
+		longSentence.split(@sentenceRegex).forEach (e) =>
+			@add e
 
 	###
 	add a sentence to jsMegaHal
@@ -59,37 +72,22 @@ class jsMegaHal
 
 		return if sentence.split(' ').length < @markov
 
-		parts = []
-		chars = sentence.split ''
-		buffer = ''
-
-		#tokenize each word character by character
-		for i in [0...chars.length] by 1
-			ch = chars[i]
-
-			if not (@wordRegex.test ch)
-				parts.push buffer if buffer.length isnt 0
-				buffer = ''
-				continue
-
-			buffer += ch
-
-		parts.push buffer if buffer.length isnt 0
+		#split the sentence by "words" and then remove any empty values from the array
+		parts = sentence.split(@wordRegex).filter Boolean
 
 		partsLength = parts.length
 
 		#split the tokens into quads of @markov length
 		for i in [0...partsLength - (@markov - 1)] by 1
 
-			quad = new Quad [ parts[i..i+3]... ]
+			quad = new Quad [ parts[i...i+@markov]... ]
 			@addQuad quad
 
 			quad.canStart = (i is 0)
 			quad.canEnd = (i is partsLength - @markov)
 
 			#first by word
-			for q in [0...@markov] by 1
-				token = quad.tokens[q]
+			for token in quad.tokens
 				@words[token] = [] if not (token of @words)
 				@words[token].push quad
 
@@ -97,13 +95,13 @@ class jsMegaHal
 			if i isnt 0
 				prevToken = parts[i-1]
 				@prev[quad.hash()] = [] if not (quad.hash() of @prev)
-				@prev[quad.hash()].push prevToken
+				@prev[quad.hash()].push prevToken if not (prevToken in @prev[quad.hash()])
 
 			#and then get the next tokens
 			if i < partsLength - @markov
 				nextToken = parts[i+@markov]
 				@next[quad.hash()] = [] if not (quad.hash() of @next)
-				@next[quad.hash()].push nextToken
+				@next[quad.hash()].push nextToken if not (nextToken in @next[quad.hash()])
 
 	###
 	generate a reply from a sentence instead of just a word
