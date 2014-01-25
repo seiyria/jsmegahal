@@ -86,7 +86,8 @@
     /*
     	add a sentence to jsMegaHal
     
-    	@sentence the sentence to add to jsMegaHal. ignored if there are fewer than @markov words in it
+    	@sentence the sentence to add to jsMegaHal.
+    		ignored if there are fewer than @markov words in it
     */
 
 

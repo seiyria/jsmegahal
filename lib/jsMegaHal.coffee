@@ -5,7 +5,7 @@ class Quad
 		@canStart = false
 		@canEnd = false
 
-	hash: () -> 
+	hash: () ->
 		@tokens.join ','
 
 ###
@@ -31,10 +31,12 @@ class jsMegaHal
 		#all of the quads, mapped by quad.hash() -> quad
 		@quads = {}
 
-		#all of the quads that can come after a given quad, mapped by quad.hash() -> [quad, quad, ...]
+		#all of the quads that can come after a given quad
+		#mapped by quad.hash() -> [quad, quad, ...]
 		@next = {}
 
-		#all of the quads that can come before a given quad, mapped by quad.hash() -> [quad, quad, ...]
+		#all of the quads that can come before a given quad
+		#mapped by quad.hash() -> [quad, quad, ...]
 		@prev = {}
 
 	###
@@ -65,14 +67,15 @@ class jsMegaHal
 	###
 	add a sentence to jsMegaHal
 
-	@sentence the sentence to add to jsMegaHal. ignored if there are fewer than @markov words in it
+	@sentence the sentence to add to jsMegaHal.
+		ignored if there are fewer than @markov words in it
 	###
 	add: (sentence) ->
 		sentence = sentence.trim()
 
 		return if sentence.split(' ').length < @markov
 
-		#split the sentence by "words" and then remove any empty values from the array
+		#split the sentence by "words" and then remove any empty values
 		parts = sentence.split(@wordRegex).filter Boolean
 
 		partsLength = parts.length
@@ -107,7 +110,7 @@ class jsMegaHal
 	generate a reply from a sentence instead of just a word
 
 	@sentence the sentence to pick a token from
-	###	
+	###
 	getReplyFromSentence: (sentence) ->
 		tokens = sentence.trim().split(' ')
 		@getReply tokens[@randomInt 0, tokens.length-1]
@@ -122,7 +125,10 @@ class jsMegaHal
 		quads = []
 
 		#if we don't have a specific word, everything is possible to choose from
-		if word and (word of @words) then quads = @words[word] else quads = Object.keys @quads
+		if word and (word of @words)
+			quads = @words[word]
+		else
+			quads = Object.keys @quads
 
 		#empty brain? nothing to say
 		return @defaultReply if quads.length is 0
