@@ -30,14 +30,6 @@
 
     jsMegaHal.prototype.sentenceRegex = /[!?\.]/;
 
-    jsMegaHal.prototype.words = Object.create(null);
-
-    jsMegaHal.prototype.quads = {};
-
-    jsMegaHal.prototype.next = {};
-
-    jsMegaHal.prototype.prev = {};
-
     /*
     	@markov - the markov order to use for this jsMegaHal instance, defaults to 4
     */
@@ -46,6 +38,10 @@
     function jsMegaHal(markov, defaultReply) {
       this.markov = markov != null ? markov : 4;
       this.defaultReply = defaultReply != null ? defaultReply : '';
+      this.words = Object.create(null);
+      this.quads = {};
+      this.next = {};
+      this.prev = {};
     }
 
     /*
