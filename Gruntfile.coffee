@@ -5,14 +5,17 @@ module.exports = (grunt) ->
             grunt.file.readJSON 'package.json'
 
         coffee:
-          dist:
-            src: ['lib/**/*.coffee']
-            dest: 'dist/jsmegahal.js'
+            dist:
+                src: ['lib/**/*.coffee']
+                dest: 'dist/jsmegahal.js'
 
         watch:
             dist:
                 files: '<%= coffee.dist.src %>'
                 tasks: [ 'default' ]
+            test:
+                files: '<%= mochaTest.dist.src %>'
+                tasks: [ 'mochaTest' ]
 
         mochaTest:
             dist:
