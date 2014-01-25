@@ -20,22 +20,22 @@ class jsMegaHal
 	#the regex to split sentences by -- remove all \r\n
 	sentenceRegex: /[!?\.]/
 
-	#all of the current words jsMegaHal knows
-	words: Object.create null
-
-	#all of the quads, mapped by quad.hash() -> quad
-	quads: {}
-
-	#all of the quads that can come after a given quad, mapped by quad.hash() -> [quad, quad, ...]
-	next: {}
-
-	#all of the quads that can come before a given quad, mapped by quad.hash() -> [quad, quad, ...]
-	prev: {}
-
 	###
 	@markov - the markov order to use for this jsMegaHal instance, defaults to 4
 	###
 	constructor: (@markov = 4, @defaultReply = '') ->
+
+		#all of the current words jsMegaHal knows
+		@words = Object.create null
+
+		#all of the quads, mapped by quad.hash() -> quad
+		@quads = {}
+
+		#all of the quads that can come after a given quad, mapped by quad.hash() -> [quad, quad, ...]
+		@next = {}
+
+		#all of the quads that can come before a given quad, mapped by quad.hash() -> [quad, quad, ...]
+		@prev = {}
 
 	###
 	generate a number between min and max, inclusive
