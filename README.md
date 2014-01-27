@@ -3,9 +3,14 @@ jsmegahal [![Build Status](https://travis-ci.org/seiyria/jsmegahal.png?branch=ma
 
 Implementation of the MegaHAL AI in JS for consumption with node.js
 
+Installation
+============
+```
+npm install jsmegahal
+```
+
 Sample Usage
 ============
-
 ```js
 jsmegahal = require('jsmegahal');
 
