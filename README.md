@@ -9,7 +9,8 @@ Sample Usage
 ```js
 jsmegahal = require('jsmegahal');
 
-var megahal = new jsmegahal();
+//you can pass in the markov order you want to use. it defaults to 4.
+var megahal = new jsmegahal(4);
 
 //add a single sentence
 megahal.add("This is a singular sentence and megahal will deconstruct it accordingly.");
