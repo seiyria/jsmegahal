@@ -29,3 +29,7 @@ console.log(megahal.getReplyFromSentence("Pick a keyword"));
 //get a string based on the markob data -- this can take a token, or nothing at all
 console.log(megahal.getReply());
 ```
+
+Projects Using This
+===================
+[alexa-chatterbot](https://github.com/moof2k/alexa-chatterbot)
