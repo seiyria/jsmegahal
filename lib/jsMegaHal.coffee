@@ -15,7 +15,7 @@ TODO more punctuation
 ###
 class jsMegaHal
 	#the regex to check the validity of a character
-	wordRegex: /[^a-zA-Z0-9,'\u00C0-\u017F]+/
+	wordRegex: /[^a-zA-Z0-9:,'\u00C0-\u017F]+/
 
 	#the regex to split sentences by -- remove all \r\n
 	sentenceRegex: /[!?\.]/
