@@ -26,9 +26,9 @@
 
 
   jsMegaHal = (function() {
-    jsMegaHal.prototype.wordRegex = /[^a-zA-Z0-9:,']+/;
+    jsMegaHal.prototype.wordRegex = /[^a-zA-Z0-9:,'\u00C0-\u017F]+/;
 
-    jsMegaHal.prototype.sentenceRegex = /[!?\.]/;
+    jsMegaHal.prototype.sentenceRegex = /[!?\.\n]/;
 
     /*
     	@markov - the markov order to use for this jsMegaHal instance, defaults to 4

@@ -18,7 +18,7 @@ class jsMegaHal
 	wordRegex: /[^a-zA-Z0-9:,'\u00C0-\u017F]+/
 
 	#the regex to split sentences by -- remove all \r\n
-	sentenceRegex: /[!?\.]/
+	sentenceRegex: /[!?\.\n]/
 
 	###
 	@markov - the markov order to use for this jsMegaHal instance, defaults to 4
